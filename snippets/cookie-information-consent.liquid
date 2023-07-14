@@ -1,0 +1,45 @@
+<script>
+(function() {
+  // Translation is done by a shopify plugin called weglot. I'm not sure exactly how it works, but when we set the languge
+  // to english and ask for the current locale in this script, the following is true:
+  // Shopify.locale returns "de"
+  // The liqiud variable request.locale.iso_code returns "de"
+  // The lang attribute on the html element is set to "en", even though in the template, it is produced by request.locale.iso_code
+  // When you run Shopify.locale in the console after the page has loaded, it returns "en"
+
+  var documentLocale = document.getElementsByTagName("html")[0].lang
+  var ciLocale = (documentLocale && documentLocale.length === 2) ? documentLocale.toUpperCase() : 'DE';
+  var cookie_script = document.createElement('script');
+  cookie_script.setAttribute('src', 'https://policy.app.cookieinformation.com/uc.js');
+  cookie_script.setAttribute('data-culture', ciLocale);
+  cookie_script.id = 'CookieConsent';
+  document.head.appendChild(cookie_script);
+
+  var trackingApiLoaded = false;
+  var consentGivenEventFired = false;
+
+  window.Shopify.loadFeatures([{
+    name: 'consent-tracking-api',
+    version: '0.1'
+  }], function(error) {
+    if (error) {
+      throw error;
+    }
+    trackingApiLoaded = true;
+    setConsentTracking();
+  });
+
+  window.addEventListener('CookieInformationConsentGiven', function() {
+    consentGivenEventFired = true;
+    setConsentTracking();
+  }, false);
+
+  function setConsentTracking() {
+    if(!(trackingApiLoaded && consentGivenEventFired)) { return };
+    var consentGiven = CookieInformation.getConsentGivenFor('cookie_cat_statistic') && CookieInformation.getConsentGivenFor('cookie_cat_marketing');
+    window.Shopify.customerPrivacy.setTrackingConsent(consentGiven, function(e) {
+      console.log("Set Tracking Consent", consentGiven);
+    });
+  }
+})();
+</script>

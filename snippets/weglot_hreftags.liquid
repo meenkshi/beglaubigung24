@@ -1,0 +1,8 @@
+{%- comment -%} Variables set by Weglot's preferences panel {%- endcomment -%}
+
+{%- unless request.path == "/collections/beglaubigte-uebersetzung-hochzeit" -%}
+<link rel="alternate" hreflang="de" href="{{ canonical_url }}">
+
+<link rel="alternate" hreflang="{{ "en" }}" href="https://en.beglaubigung24.de{{ request.path }}">
+
+{%- endunless -%}

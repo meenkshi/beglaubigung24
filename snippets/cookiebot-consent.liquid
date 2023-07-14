@@ -1,0 +1,47 @@
+<script>
+(function () {
+  function feedback() {
+    const p = window.Shopify.customerPrivacy;
+    p.userCanBeTracked()
+    window.Shopify.customerPrivacy.currentVisitorConsent()
+    console.log("Shopify.customerPrivacy", {
+      userCanBeTracked: p.userCanBeTracked(),
+      currentVisitorConsent: window.Shopify.customerPrivacy.currentVisitorConsent()
+    });
+  }
+
+  function setTrackingConsent() {
+    var cookiebotLoaded = "Cookiebot" in window;
+    var consentSelected = Cookiebot.consented || Cookiebot.declined;
+    var shopifyPrivacyAPILoaded = window.Shopify.customerPrivacy;
+
+    if (cookiebotLoaded && consentSelected && shopifyPrivacyAPILoaded) {
+      window.Shopify.customerPrivacy.setTrackingConsent({
+        "analytics": Cookiebot.consent.statistics,
+        "marketing": Cookiebot.consent.marketing,
+        "preferences": Cookiebot.consent.preferences,
+        "sale_of_data": false,
+      }, feedback);
+    } else if (shopifyPrivacyAPILoaded) {
+      window.Shopify.customerPrivacy.setTrackingConsent({
+        "analytics": false,
+        "marketing": false,
+        "preferences": false,
+        "sale_of_data": false,
+      }, feedback);
+    }
+  }
+  window.Shopify.loadFeatures(
+    [{ name: "consent-tracking-api", version: "0.1" }],
+    function (error) {
+      if (error) throw error;
+      console.log("consent-tracking-api");
+      setTrackingConsent();
+    }
+  );
+  window.addEventListener("CookiebotOnConsentReady", function () {
+    console.log("CookiebotOnConsentReady");
+    setTrackingConsent();
+  });
+})();
+</script>

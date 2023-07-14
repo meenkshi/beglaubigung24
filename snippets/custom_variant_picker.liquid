@@ -1,0 +1,810 @@
+{%- unless product.has_only_default_variant -%}
+  {%- if block.settings.picker_type_custom == 'button' -%}
+    <variant-radios class="no-js-hidden" data-section="{{ section.id }}" data-url="{{ product.url }}" {{ block.shopify_attributes }}>
+      {%- for option in product.options_with_values -%}
+      {% assign val = forloop.index %}
+          <fieldset class="js product-form__input">
+            <legend class="form__label">{{ option.name }}</legend>
+            {%- for value in option.values -%}
+              <input type="radio" id="{{ section.id }}-{{ option.position }}-{{ forloop.index0 }}"
+                    name="{{ option.name }}"
+                    value="{{ value | escape }}"
+                    form="{{ product_form_id }}"
+                    {% if option.selected_value == value %}checked{% endif %}
+              >
+              <label class="radio-label label-{{val}} cust{{ value | replace: " ","-" | replace: "'","-" | replace: '"',"-" | replace: "|","-" | replace: "ⓢ","s" | replace: "(","" | replace: ")","" | replace: ".",""  | replace: "/",""   }}" for="{{ section.id }}-{{ option.position }}-{{ forloop.index0 }}">
+                {{ value }}
+              </label>
+            {%- endfor -%}
+          </fieldset>
+      {%- endfor -%}
+      <script type="application/json">
+        {{ product.variants | json }}
+      </script>
+    </variant-radios>
+  {%- else -%}
+    <variant-selects class="no-js-hidden" data-section="{{ section.id }}" data-url="{{ product.url }}" {{ block.shopify_attributes }}>
+      {%- for option in product.options_with_values -%}
+        <div class="product-form__input product-form__input--dropdown">
+          <label class="form__label" for="Option-{{ section.id }}-{{ forloop.index0 }}">
+            {{ option.name }}
+          </label>
+          <div class="select">
+            <select id="Option-{{ section.id }}-{{ forloop.index0 }}"
+              class="select__select label-{{forloop.index}}"
+              name="options[{{ option.name | escape }}]"
+              form="{{ product_form_id }}"
+            >
+              {%- for value in option.values -%}
+                <option data-value="{{ value }}" class="cust{{ value | replace: " ","-" | replace: "'","-" | replace: '"',"-" | replace: "|","-" | replace: "ⓢ","s" | replace: "(","" | replace: ")","" | replace: ".",""  | replace: "/",""   }}" value="{{ value | escape }}" {% if option.selected_value == value %}selected="selected"{% endif %}>
+                  {{ value }}
+                </option>
+              {%- endfor -%}
+            </select>
+            {% render 'icon-caret' %}
+          </div>
+        </div>
+      {%- endfor -%}
+
+      <script type="application/json">
+        {{ product.variants | json }}
+      </script>
+    </variant-selects>
+  {%- endif -%}
+{%- endunless -%}
+
+<noscript class="product-form__noscript-wrapper-{{ section.id }}">
+  <div class="product-form__input{% if product.has_only_default_variant %} hidden{% endif %}">
+    <label class="form__label" for="Variants-{{ section.id }}">{{ 'products.product.product_variants' | t }}</label>
+    <div class="select">
+      <select name="id" id="Variants-{{ section.id }}" class="select__select" form="{{ product_form_id }}">
+        {%- for variant in product.variants -%}
+          <option
+            {% if variant == product.selected_or_first_available_variant %}selected="selected"{% endif %}
+            {% if variant.available == false %}disabled{% endif %}
+            value="{{ variant.id }}"
+          >
+            {{ variant.title }}
+            {%- if variant.available == false %} - {{ 'products.product.sold_out' | t }}{% endif %}
+            - {{ variant.price | money | strip_html }}
+          </option>
+        {%- endfor -%}
+      </select>
+      {% render 'icon-caret' %}
+    </div>
+  </div>
+</noscript>
+
+
+
+
+
+{%- for block in section.blocks -%}
+
+
+
+{% if block.settings.sold_out_opacity_custom %}
+{% style %}
+.variant-sold-out{
+opacity: {{block.settings.sold_out_opacity_custom}} !important;
+}
+{% endstyle %}
+
+<script> console.log("{{block.settings.sold_out_opacity_custom}}");</script>
+{% endif %}
+
+
+<!--grey out sold out-->
+{% if block.settings.yes_no_grey_out_sold_custom %}
+
+
+
+
+
+
+<style type="text/css">
+.variant-sold-out{
+opacity: 0.2 !important;
+}
+
+</style>
+{% endif %}
+
+<!--hide  sold out-->
+{% if block.settings.hide_sold_custom %}
+
+
+
+
+
+
+<style type="text/css">
+.variant-sold-out{
+display:none !important;
+}
+
+</style>
+{% endif %}
+
+{% comment %}
+
+{% if block.settings.yes_no_grey_out_unavailable_custom %}
+
+
+<style type="text/css">
+.variant-does-not-exist{
+opacity: 0.2 !important;
+}
+
+</style>
+{% endif %}
+{% endcomment %}
+
+{% if block.settings.hide_unavailable_custom %}
+
+
+<style type="text/css">
+.variant-does-not-exist{
+display:none !important;
+}
+
+
+</style>
+{% endif %}
+
+
+<style>
+{{block.settings.css_style_custom}}
+</style>
+
+{% if block.settings.yes_no_stock_custom and product.options.size == 3 %}
+
+<script>
+window.productData = [
+
+{% for variant in product.variants %}
+{
+id:  {{ variant.id }},
+available: {{ variant.available }},
+quantity: {{ variant.inventory_quantity }},
+option1: 'cust{{variant.option1 | replace: " ","-" | replace: "'","-" | replace: '"',"-" | replace: "|","-" | replace: "ⓢ","s" | replace: "(","" | replace: ")","" | replace: ".",""  | replace: "/",""   }}',
+option2: 'cust{{variant.option2 | replace: " ","-" | replace: "'","-" | replace: '"',"-" | replace: "|","-" | replace: "ⓢ","s" | replace: "(","" | replace: ")","" | replace: ".",""  | replace: "/",""   }}',
+option3: 'cust{{variant.option3 | replace: " ","-" | replace: "'","-" | replace: '"',"-" | replace: "|","-" | replace: "ⓢ","s" | replace: "(","" | replace: ")","" | replace: ".",""  | replace: "/",""   }}',
+
+},
+
+{% endfor%}
+]
+
+
+window.variantData = {}
+
+{% for variant in product.variants %}
+{% assign opts = '' %}
+{% if variant.option1 != opt1 %}
+{% for var in product.variants %}
+{% assign opt1 = variant.option1 %}
+{% if variant.option1 == var.option1 %}
+{% if second_opt != var.option2 %}
+{% assign second_opt = var.option2 %}
+
+
+
+{% assign value_1 = var.option2 | replace: " ","-" | replace: "'","-" | replace: '"',"-" | replace: "|","-" | replace: "ⓢ","s" | replace: "(","" | replace: ")","" | replace: ".",""  | replace: "/",""   %}
+{% assign value_2 = 'cust' | append: value_1  %}
+
+
+
+{% assign opts = opts | append: value_2 %}
+{% unless forloop.last %}{% assign opts = opts | append: ',' %}{% endunless %}
+{% endif %}
+{% endif %}
+
+
+{% endfor%}
+
+variantData['cust{{variant.option1 | replace: " ","-" | replace: "'","-" | replace: '"',"-" | replace: "|","-" | replace: "ⓢ","s" | replace: "(","" | replace: ")","" | replace: ".",""  | replace: "/",""  }}']= {
+      options:'{{opts}}'
+      }
+      {% endif %}
+
+      {% endfor%}
+
+
+console.log({{product.options_with_values | json}});
+
+      
+{%- if block.settings.picker_type_custom == 'button' -%}
+
+checkAllAvail()
+function checkAllAvail(){
+if(document.querySelector('fieldset.js.product-form__input:nth-child(2) .all-child-variants-unavailable-or-sold-out')){
+Array.from(document.querySelectorAll('fieldset.js.product-form__input:nth-child(2) .all-child-variants-unavailable-or-sold-out')).forEach(function(l){
+l.classList.remove('all-child-variants-unavailable-or-sold-out')
+})
+}
+var optt1 = Array.from(document.querySelector('.product-form__input:nth-child(1) input[type=radio]:checked+label').classList)
+var opttt1 = ''
+optt1.forEach(q=>{
+if(q.toString().includes('cust')){
+opttt1 = q
+}
+})
+
+Array.from(document.querySelectorAll('.product-form__input:nth-child(2) label')).forEach(function(z){
+var optt2 = z.classList;
+var opttt2 = ''
+optt2.forEach(q=>{
+if(q.toString().includes('cust')){
+opttt2 = q
+}
+})   
+
+var all_not_av = true;
+
+window.productData.forEach(function(x){
+if(x.option1 == opttt1){
+if(x.option2 == opttt2){
+if(x.quantity!=0){
+ all_not_av = false;
+}
+}
+}
+})
+
+if(all_not_av){
+document.querySelector('.'+opttt2).classList.add('all-child-variants-unavailable-or-sold-out')
+}
+})
+
+}
+function deleteVariants() {
+Array.from(document.getElementsByClassName('variant-sold-out')).forEach(function(d) {
+d.classList.remove('variant-sold-out');
+})
+Array.from(document.getElementsByClassName('label-3')).forEach(function(d) {
+d.classList.add('variant-does-not-exist');
+}) 
+
+setTimeout(()=>{
+window.productData.forEach(function(x) {
+
+if (!x.available) {
+if (document.querySelector('.product-form__input:nth-child(1) input[type=radio]:checked+label').classList.contains(x.option1) && document.querySelector('.product-form__input:nth-child(2) input[type=radio]:checked+label').classList.contains(x.option2)) {
+Array.from(document.getElementsByClassName(x.option3)).forEach(function(d) {
+d.classList.add('variant-sold-out');
+d.classList.remove('variant-does-not-exist');
+})
+}
+} else {
+if (document.querySelector('.product-form__input:nth-child(1) input[type=radio]:checked+label').classList.contains(x.option1)  && document.querySelector('.product-form__input:nth-child(2) input[type=radio]:checked+label').classList.contains(x.option2)) {
+
+
+
+Array.from(document.getElementsByClassName(x.option3)).forEach(function(d) {
+d.classList.remove('variant-sold-out');
+d.classList.remove('variant-does-not-exist');
+})
+
+
+
+
+// window.variantData[x.option1].options.split(',').forEach(function(d) {
+//   if (d) {
+//     // document.querySelector('.' + d).classList.remove('variant-does-not-exist');
+//   }
+// })
+}
+
+}
+})
+
+
+var show = 0;
+Array.from(document.querySelectorAll('fieldset.js.product-form__input:nth-child(3) label')).forEach(x=>{
+
+if(x.classList.contains('variant-sold-out') || x.classList.contains('variant-does-not-exist')){
+
+}else{
+show = 1;
+}
+})
+
+
+
+
+
+// if(show == 0){
+//   //document.querySelector('fieldset.js.product-form__input:nth-child(2) input[type=radio]:checked+label').classList.add('all-child-variants-unavailable-or-sold-out')
+// }else{
+// if(document.querySelector('fieldset.js.product-form__input:nth-child(2) .all-child-variants-unavailable-or-sold-out')){
+//  //document.querySelector('fieldset.js.product-form__input:nth-child(2) .all-child-variants-unavailable-or-sold-out').classList.remove('all-child-variants-unavailable-or-sold-out')
+// }
+// }
+checkAllAvail()
+
+},5)
+
+
+// if (document.querySelector('.product-form__input input[type=radio]:checked+.label-3').classList.contains('variant-does-not-exist')) {
+//   document.querySelector('.radio-label.label-3:not(.variant-does-not-exist)').click();
+// }
+
+// if (document.querySelector('.product-form__input input[type=radio]:checked+.label-3').classList.contains('variant-sold-out')) {
+//   document.querySelector('.radio-label.label-3:not(.variant-sold-out)').click();
+// }
+
+
+
+}
+
+{% else %}
+function deleteVariants() {
+
+var selectBox1 = document.querySelector( ".label-1" );
+var selectBox2 = document.querySelector( ".label-2" );
+
+Array.from(document.getElementsByClassName('.label-3 option')).forEach(function(d) {
+d.innerHTML = d.innerHTML.split(' ')[0];
+})
+
+Array.from(document.querySelectorAll('.label-3 option')).forEach(function(d) {
+d.innerHTML = (d.getAttribute('value')+ ' {{block.settings.unavailable_text_custom}}')
+})
+window.productData.forEach(function(x) {
+if (!x.available) {
+if (selectBox1.options[ selectBox1.selectedIndex ].classList.contains(x.option1) &&  selectBox2.options[ selectBox2.selectedIndex ].classList.contains(x.option2)) {
+  Array.from(document.querySelectorAll('option.'+x.option3)).forEach(function(d) {
+    d.innerHTML = (d.getAttribute('value')+ ' {{block.settings.sold_out_text_custom}}')
+    d.classList.add('sold-out')
+    if (x.option3 && !document.querySelector('option.' + x.option3).classList.contains('.sold-out')) {
+      document.querySelector('option.' + x.option3).innerHTML = document.querySelector('option.' + x.option3).getAttribute('data-value');
+    }
+    {% if block.settings.disable_sold_out_custom %}
+    d.disabled = true;
+    {% endif %}
+  })
+}
+} else {
+if (selectBox1.options[ selectBox1.selectedIndex ].classList.contains(x.option1) &&  selectBox2.options[ selectBox2.selectedIndex ].classList.contains(x.option2)) {
+  Array.from(document.querySelectorAll('option.'+x.option3)).forEach(function(d) {
+    d.innerHTML  = (d.getAttribute('value'))
+    d.classList.remove('sold-out')
+    if (x.option3 && !document.querySelector('option.' + x.option3).classList.contains('.sold-out')) {
+      document.querySelector('option.' + x.option3).innerHTML = document.querySelector('option.' + x.option3).getAttribute('data-value');
+    }
+     {% if block.settings.disable_sold_out_custom %}
+    d.disabled = false;
+    {% endif %}
+  })
+
+
+
+
+  // window.variantData[x.option1].options.split(',').forEach(function(d) {
+  //   if (d && !document.querySelector('option.' + d).classList.contains('.sold-out')) {
+  //     document.querySelector('option.' + d).innerHTML = (d);
+  //   }
+  // })
+
+
+}
+
+}
+})
+
+
+setTimeout(()=>{
+  Array.from(document.querySelectorAll('.sold-out')).forEach(function(d) {
+    if(d.innerHTML.split(' ').length <= 1){
+      d.innerHTML = (d.getAttribute('value')+ ' {{block.settings.sold_out_text_custom}}')
+    {% if block.settings.disable_sold_out_custom %}
+      d.disabled = true;
+    {% endif %}
+    }
+  })
+},50)
+
+// var sel = document.querySelector(".label-3");
+// var selOpt= sel.options[sel.selectedIndex];
+// var count1 = 0;
+
+//         if (selOpt.innerHTML.split(' ').length > 1) {
+//           Array.from(document.querySelectorAll('.label-3 option')).forEach(function(x){ 
+//           if(x.innerHTML.split(' ').length <= 1 && count1 == 0){
+//            document.querySelector('.label-3').value = x.getAttribute('value') ;
+//             count1 = 1;
+//             return;
+//           }
+//         })
+//           var event = new Event('change');
+
+// // Dispatch it.
+// document.querySelector('variant-selects').dispatchEvent(event);
+
+//   }
+
+
+
+}
+{% endif %}
+
+
+window.addEventListener('load', function() {
+deleteVariants()
+});
+
+if (window.attachEvent) {
+window.attachEvent('onload', function() {
+deleteVariants()
+});
+}
+
+</script>
+
+{% elsif block.settings.yes_no_stock_custom and product.options.size == 2 %}
+
+<script>
+window.productData = [
+
+{% for variant in product.variants %}
+{
+id:  {{ variant.id }},
+available: {{ variant.available }},
+quantity: {{ variant.inventory_quantity }},
+option1: 'cust{{variant.option1 | replace: " ","-" | replace: "'","-" | replace: '"',"-" | replace: "|","-" | replace: "ⓢ","s" | replace: "(","" | replace: ")","" | replace: ".",""  | replace: "/",""   }}',
+option2: 'cust{{variant.option2 | replace: " ","-" | replace: "'","-" | replace: '"',"-" | replace: "|","-" | replace: "ⓢ","s" | replace: "(","" | replace: ")","" | replace: ".",""  | replace: "/",""   }}',
+
+},
+
+{% endfor%}
+]
+
+
+window.variantData = {}
+
+{% for variant in product.variants %}
+{% assign opts = '' %}
+{% if variant.option1 != opt1 %}
+{% for var in product.variants %}
+{% assign opt1 = variant.option1 %}
+{% if variant.option1 == var.option1 %}
+
+{% assign value_1 = var.option2 | replace: " ","-" | replace: "'","-" | replace: '"',"-" | replace: "|","-" | replace: "ⓢ","s" | replace: "(","" | replace: ")","" | replace: ".",""  | replace: "/",""   %}
+{% assign value_2 = 'cust' | append: value_1  %}
+
+{% assign opts = opts | append: value_2 %}
+{% unless forloop.last %}{% assign opts = opts | append: ',' %}{% endunless %}
+{% endif %}
+
+
+{% endfor%}
+
+variantData['cust{{variant.option1 | replace: " ","-" | replace: "'","-" | replace: '"',"-" | replace: "|","-" | replace: "ⓢ","s" | replace: "(","" | replace: ")","" | replace: ".",""  | replace: "/",""   }}']= {
+      options:'{{opts}}'
+      }
+      {% endif %}
+
+      {% endfor%}
+      
+      
+{%- if block.settings.picker_type_custom == 'button' -%}
+function deleteVariants() {
+Array.from(document.getElementsByClassName('variant-sold-out')).forEach(function(d) {
+d.classList.remove('variant-sold-out');
+})
+window.productData.forEach(function(x) {
+if (!x.available) {
+if (document.querySelector('.product-form__input input[type=radio]:checked+label').classList.contains(x.option1)) {
+Array.from(document.getElementsByClassName(x.option2)).forEach(function(d) {
+d.classList.add('variant-sold-out')
+})
+}
+} else {
+if (document.querySelector('.product-form__input input[type=radio]:checked+label').classList.contains(x.option1)) {
+Array.from(document.getElementsByClassName(x.option2)).forEach(function(d) {
+d.classList.remove('variant-sold-out');
+})
+
+Array.from(document.getElementsByClassName('label-2')).forEach(function(d) {
+d.classList.add('variant-does-not-exist');
+})
+
+
+window.variantData[x.option1].options.split(',').forEach(function(d) {
+if (d) {
+document.querySelector('.' + d).classList.remove('variant-does-not-exist');
+}
+})
+}
+
+}
+})
+
+
+// if (document.querySelector('.product-form__input input[type=radio]:checked+.label-2').classList.contains('variant-does-not-exist')) {
+//   document.querySelector('.radio-label.label-2:not(.variant-does-not-exist)').click();
+// }
+
+// if (document.querySelector('.product-form__input input[type=radio]:checked+.label-2').classList.contains('variant-sold-out')) {
+//   document.querySelector('.radio-label.label-2:not(.variant-sold-out)').click();
+// }
+
+var show = 0;
+Array.from(document.querySelectorAll('fieldset.js.product-form__input:nth-child(2) label')).forEach(x=>{
+
+if(x.classList.contains('variant-sold-out') || x.classList.contains('variant-does-not-exist')){
+
+}else{
+show = 1;
+}
+})
+
+if(show == 0){
+document.querySelector('fieldset.js.product-form__input:nth-child(1) input[type=radio]:checked+label').classList.add('all-child-variants-unavailable-or-sold-out')
+}else{
+if(document.querySelector('fieldset.js.product-form__input:nth-child(1) .all-child-variants-unavailable-or-sold-out')){
+document.querySelector('fieldset.js.product-form__input:nth-child(1) .all-child-variants-unavailable-or-sold-out').classList.remove('all-child-variants-unavailable-or-sold-out')
+}
+}
+
+
+}
+
+{% else %}
+function deleteVariants() {
+  var unavailableText = '{{block.settings.unavailable_text_custom}}';
+  unavailableText = Weglot.getCurrentLang() === 'de' ? '(Nicht verfügbar)' : '(Unavailable)';
+var selectBox1 = document.querySelector( ".label-1" );
+
+Array.from(document.getElementsByClassName('.label-2 option')).forEach(function(d) {
+d.innerHTML = d.innerHTML.split(' ')[0];
+})
+
+Array.from(document.querySelectorAll('.label-2 option')).forEach(function(d) {
+d.innerHTML = (d.getAttribute('data-value') + ' ' + unavailableText)
+d.classList.add('variant-does-not-exist');
+d.disabled = true;
+})
+window.productData.forEach(function(x) {
+if (!x.available) {
+if (selectBox1.options[ selectBox1.selectedIndex ].classList.contains(x.option1)) {
+  Array.from(document.querySelectorAll('option.'+x.option2)).forEach(function(d) {
+    d.innerHTML = (d.getAttribute('data-value')+ ' {{block.settings.sold_out_text_custom}}')
+    d.classList.add('sold-out')
+    d.classList.remove('variant-does-not-exist');
+   if (x.option2 && !document.querySelector('option.' + x.option2).classList.contains('.sold-out')) {
+      document.querySelector('option.' + x.option2).innerHTML = document.querySelector('option.' + x.option2).getAttribute('data-value');
+    }
+    {% if block.settings.disable_sold_out_custom %}
+    d.disabled = true;
+    {% endif %}
+  })
+}
+} else {
+if (selectBox1.options[ selectBox1.selectedIndex ].classList.contains(x.option1)) {
+  Array.from(document.querySelectorAll('option.'+x.option2)).forEach(function(d) {
+    d.innerHTML  = (d.getAttribute('data-value'))
+    d.classList.remove('sold-out')
+    d.classList.remove('variant-does-not-exist');
+    d.disabled = false;
+    if (x.option2 && !document.querySelector('option.' + x.option2).classList.contains('.sold-out')) {
+      document.querySelector('option.' + x.option2).innerHTML = document.querySelector('option.' + x.option2).getAttribute('data-value');
+    }
+     {% if block.settings.disable_sold_out_custom %}
+    d.disabled = false;
+    {% endif %}
+  })
+
+  // Array.from(document.querySelectorAll('.label-2 option')).forEach(function(d) {
+  //   d.innerHTML = (d.getAttribute('value')+ ' {{block.settings.unavailable_text_custom}}')
+  // })
+
+
+  // window.variantData[x.option1].options.split(',').forEach(function(d) {
+  //   if (d && !document.querySelector('option.' + d).classList.contains('.sold-out')) {
+  //     document.querySelector('option.' + d).innerHTML = (d);
+  //   }
+  // })
+
+
+
+}
+
+
+
+  Array.from(document.querySelectorAll('.sold-out')).forEach(function(d) {
+    if(d.innerHTML.split(' ').length <= 1){
+      d.innerHTML = (d.getAttribute('data-value')+ ' {{block.settings.sold_out_text_custom}}')
+    {% if block.settings.disable_sold_out_custom %}
+      d.disabled = true;
+    {% endif %}
+    }
+  })
+
+}
+})
+
+
+// var sel = document.querySelector(".label-2");
+// var selOpt= sel.options[sel.selectedIndex];
+// var count1 = 0;
+
+//         if (selOpt.innerHTML.split(' ').length > 1) {
+//           Array.from(document.querySelectorAll('.label-2 option')).forEach(function(x){ 
+//           if(x.innerHTML.split(' ').length <= 1 && count1 == 0){
+//            document.querySelector('.label-2').value = x.getAttribute('value') ;
+//             count1 = 1;
+//             return;
+//           }
+//         })
+//           var event = new Event('change');
+
+// // Dispatch it.
+// document.querySelector('variant-selects').dispatchEvent(event);
+
+//   }
+// Added by Jannis Widderich 2023-01-06
+// After selecting a variant in the first select box, the second select box might have a variation selected
+// by default that does not exist. If so, we find the first available variation and select that. We also have
+// to trigger onVariantChange on the variant-selector to update the rest of the UI.
+// This does trigger this method (deleteVariants) again, but this time the selected variant is available, preventing
+// an infinite loop.
+var selectBox2 = document.querySelector(".label-2");
+if(selectBox2.options[selectBox2.selectedIndex].classList.contains("variant-does-not-exist")) {
+var firstExistingOption = Array.from(selectBox2.options).find(o => !o.classList.contains("variant-does-not-exist"));
+if(firstExistingOption) {
+selectBox2.value = firstExistingOption.value;
+var variantSelector = document.querySelector("variant-selects");
+variantSelector.onVariantChange();
+}
+}
+
+
+}
+{% endif %}
+
+// Added by Jannis Widderich 2023-01-16
+// There is a conflict between the variant hider and Weglot, which is unsed to translate the shop, work.
+// Weglot uses javascript for the translation, which means that the shop is always rendered in german, and
+// Weglots Javascript replaces all text on the page with the appropriate translation.
+// The variant hider saves the original name of the variant in a data-attribute at render time (thus, always
+// in german) and Weglot does not translate this data-attribute. As this data-attribute is used to restore the
+// original name of the variant, the names always appear in german.
+// Below, we fix this by first replacing the data-attribute values with its translation before we run the
+// variant hider.
+async function translateLanguageOptions() {
+  var options = Array.from(document.querySelectorAll("option[data-value]"));
+  var words = options.map(n => ({t: 1, w: n.getAttribute('data-value')}));
+  var languageTo = Weglot.getCurrentLang();
+
+  await new Promise((resolve, reject) => {
+    Weglot.initialized ? resolve() : Weglot.on("initialized", resolve);
+  });
+
+  const translations = await Weglot.translate({words, languageTo});
+  options.forEach((option, i) => option.setAttribute('data-value', translations[i]));
+  return translations;
+}
+
+var translateLanguageOptionsPs = translateLanguageOptions();
+window.addEventListener('load', async function() {
+  await translateLanguageOptionsPs;
+  deleteVariants();
+});
+
+if (window.attachEvent) {
+window.attachEvent('onload', async function() {
+  await translateLanguageOptionsPs;
+  deleteVariants();
+});
+}
+
+</script>
+{% elsif block.settings.yes_no_stock_custom and product.options.size == 1  %}
+<script>
+window.productData = [
+
+{% for variant in product.variants %}
+{
+id:  {{ variant.id }},
+available: {{ variant.available }},
+quantity: {{ variant.inventory_quantity }},
+option1: 'cust{{variant.option1 | replace: " ","-" | replace: "'","-" | replace: '"',"-" | replace: "|","-" | replace: "ⓢ","s" | replace: "(","" | replace: ")","" | replace: ".",""  | replace: "/",""   }}',
+option2: 'cust{{variant.option2 | replace: " ","-" | replace: "'","-" | replace: '"',"-" | replace: "|","-" | replace: "ⓢ","s" | replace: "(","" | replace: ")","" | replace: ".",""  | replace: "/",""   }}',
+
+},
+
+{% endfor%}
+];
+
+{%- if block.settings.picker_type_custom == 'button' -%}
+function deleteVariants() {
+window.productData.forEach(function(x) {
+if (!x.available) {
+Array.from(document.getElementsByClassName(x.option1)).forEach(function(d) {
+d.classList.add('variant-sold-out')
+})
+} else {
+Array.from(document.getElementsByClassName(x.option1)).forEach(function(d) {
+d.classList.remove('variant-sold-out');
+})
+
+}
+})
+    
+    
+if (document.querySelector('.product-form__input input[type=radio]:checked+label').classList.contains('variant-sold-out')) {
+//document.querySelector('label.radio-label:not(.variant-sold-out)').click();
+}
+
+}
+
+{% else %}
+function deleteVariants() {
+var selectBox1 = document.querySelector( ".label-1" )
+Array.from(document.getElementsByClassName('.label-1 option')).forEach(function(d) {
+d.innerHTML = d.innerHTML.split(' ')[0];
+})
+window.productData.forEach(function(x) {
+if (!x.available) {
+  Array.from(document.querySelectorAll('option.'+x.option1)).forEach(function(d) {
+    d.innerHTML = (d.getAttribute('value')+ ' {{block.settings.sold_out_text_custom}}')
+    d.classList.add('sold-out')
+  })
+} else {
+if (selectBox1.options[ selectBox1.selectedIndex ].classList.contains(x.option1)) {
+  Array.from(document.querySelectorAll('option.'+x.option1)).forEach(function(d) {
+    d.innerHTML  = (d.getAttribute('value'))
+    d.classList.remove('sold-out')
+//                 d.disabled = false;
+  })
+
+
+}
+
+}
+})
+
+
+// var sel = document.querySelector(".label-1");
+// var selOpt= sel.options[sel.selectedIndex];
+// var count1 = 0;
+
+//         if (selOpt.innerHTML.split(' ').length > 1) {
+//           Array.from(document.querySelectorAll('.label-1 option')).forEach(function(x){ 
+//           if(x.innerHTML.split(' ').length <= 1 && count1 == 0){
+//            document.querySelector('.label-1').value = x.getAttribute('value') ;
+//             count1 = 1;
+//             return;
+//           }
+//         })
+//           var event = new Event('change');
+
+// // Dispatch it.
+// document.querySelector('variant-selects').dispatchEvent(event);
+
+//   }
+
+
+
+}
+{% endif %}
+window.addEventListener('load', function() {
+deleteVariants()
+});
+
+if (window.attachEvent) {
+window.attachEvent('onload', function() {
+deleteVariants()
+});
+}
+
+
+</script>
+{% elsif forloop.first %}
+<script>function deleteVariants(){}</script>
+{% endif %}
+
+
+{% endfor %}

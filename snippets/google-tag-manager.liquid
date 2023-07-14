@@ -1,0 +1,55 @@
+{% comment %}
+The actual tagmanager gets included by shopify itself. It can be set under Shopify Admin -> Onlineshop -> Configuration.
+{% endcomment %}
+
+{% comment %}
+Removed on 12.07.2022 - was not needed, GTM already provides the 'gtag' functionality
+<!-- Global site tag (gtag.js) - Google Ads: 366224783 -->
+<!--script async src="https://www.googletagmanager.com/gtag/js?id=AW-366224783"></script-->
+{% endcomment %}
+
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('consent', 'default', {
+    ad_storage: 'denied',
+    analytics_storage: 'denied',
+    functionality_storage: 'denied',
+    personalization_storage: 'denied',
+    security_storage: 'denied',
+    wait_for_update: 2000
+  });
+
+  gtag('js', new Date());
+
+  gtag('config', 'AW-366224783');
+
+  dataLayer.push({"ecommerce": null});
+  dataLayer.push({
+    "ecommerce": {
+    "value": {{ cart.total_price | times: 0.01 | json }},
+    "currency": {{ cart.currency.iso_code | json }},
+    "items": [
+    {% for line_item in cart.items %}{
+        "item_id": {{ line_item.product_id | json }},
+        "item_name": {{ line_item.product.title | json }},
+        "quantity": {{ line_item.quantity | json }},
+        "price": {{ line_item.line_price | times: 0.01 | json }},
+        "item_variant": {{ line_item.variant.title | json }},
+        {% for option in line_item.options_with_values %}
+          {% if option.name == 'Ausgangssprache' %}
+          "item_category": {{ option.value | json }},
+          {% endif %}
+          {% if option.name == 'Zielsprache' %}
+          "item_category2": {{ option.value | json }},
+          {% endif %}
+        {% endfor %}
+      },{% endfor %}
+    ]
+  }});
+</script>
+
+{% comment %}
+Removed on 12.07.2022 - Bing conversions Tracking is now implemneted in GTM
+<!--script>(function(w,d,t,r,u){var f,n,i;w[u]=w[u]||[],f=function(){var o={ti:"20265619"};o.q=w[u],w[u]=new UET(o),w[u].push("pageLoad")},n=d.createElement(t),n.src=r,n.async=1,n.onload=n.onreadystatechange=function(){var s=this.readyState;s&&s!=="loaded"&&s!=="complete"||(f(),n.onload=n.onreadystatechange=null)},i=d.getElementsByTagName(t)[0],i.parentNode.insertBefore(n,i)})(window,document,"script","//bat.bing.com/bat.js","uetq");</script-->
+{% endcomment %}
