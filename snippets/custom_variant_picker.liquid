@@ -444,7 +444,7 @@ deleteVariants()
 
 {% elsif block.settings.yes_no_stock_custom and product.options.size == 2 %}
 
-<script>
+<script type="lazyload">
 window.productData = [
 
 {% for variant in product.variants %}
